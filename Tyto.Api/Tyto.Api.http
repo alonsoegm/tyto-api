@@ -1,0 +1,25 @@
+@baseUrl = http://localhost:5298
+
+### Get all language models
+GET {{baseUrl}}/api/language-models
+Accept: application/json
+
+###
+
+### Get all document models
+GET {{baseUrl}}/api/document-models
+Accept: application/json
+
+###
+
+### Get all database connections
+GET {{baseUrl}}/api/database-connections
+Accept: application/json
+
+###
+
+### Get all configurations
+GET {{baseUrl}}/api/configurations
+Accept: application/json
+
+###

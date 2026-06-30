@@ -1,0 +1,13 @@
+<Project>
+
+  <!-- Settings shared by every project in the solution (API + tests). -->
+  <PropertyGroup>
+    <!-- Run IDE code-style analyzers (IDExxxx) as part of the build, using .editorconfig severities. -->
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <!-- Use the latest analyzer release with the SDK's default recommended rule set. -->
+    <AnalysisLevel>latest</AnalysisLevel>
+    <!-- Fail the build on any warning (compiler, analyzer, or NuGet). Keeps the codebase clean. -->
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+</Project>
