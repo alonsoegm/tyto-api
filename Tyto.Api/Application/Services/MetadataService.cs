@@ -1,11 +1,11 @@
+using FluentResults;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Tyto.Api.Application.Common.Errors;
 using Tyto.Api.Application.DTOs.Metadata;
 using Tyto.Api.Application.Interfaces;
 using Tyto.Api.Domain.Entities;
 using Tyto.Api.Infrastructure.Data;
-using FluentResults;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Memory;
 
 namespace Tyto.Api.Application.Services;
 

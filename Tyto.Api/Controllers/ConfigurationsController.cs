@@ -1,9 +1,9 @@
+using Microsoft.AspNetCore.Mvc;
 using Tyto.Api.Application.Common;
 using Tyto.Api.Application.Common.Constants;
 using Tyto.Api.Application.DTOs.Configuration;
 using Tyto.Api.Application.DTOs.Extraction;
 using Tyto.Api.Application.Interfaces;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Tyto.Api.Controllers;
 

@@ -2,10 +2,10 @@ using Azure;
 using Azure.AI.OpenAI;
 using Azure.Core;
 using Azure.Identity;
-using Tyto.Api.Domain.Entities;
-using Tyto.Api.Domain.Enums;
 using Microsoft.AspNetCore.DataProtection;
 using OpenAI.Chat;
+using Tyto.Api.Domain.Entities;
+using Tyto.Api.Domain.Enums;
 
 namespace Tyto.Api.Application.Services.Extraction;
 

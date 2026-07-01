@@ -1,0 +1,5 @@
+#!/usr/bin/env sh
+. "$(dirname "$0")/_/husky.sh"
+
+## Formatting gate: verify staged C# files match .editorconfig before allowing the commit.
+dotnet husky run --group pre-commit

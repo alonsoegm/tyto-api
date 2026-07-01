@@ -1,3 +1,16 @@
+using System.Net.Http.Headers;
+using System.Text;
+using System.Text.Json;
+using Azure;
+using Azure.AI.OpenAI;
+using Azure.Core;
+using Azure.Identity;
+using FluentResults;
+using FluentValidation;
+using Mapster;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.EntityFrameworkCore;
+using OpenAI.Chat;
 using Tyto.Api.Application.Common;
 using Tyto.Api.Application.Common.Constants;
 using Tyto.Api.Application.Common.Errors;
@@ -7,19 +20,6 @@ using Tyto.Api.Application.Interfaces;
 using Tyto.Api.Domain.Entities;
 using Tyto.Api.Domain.Enums;
 using Tyto.Api.Infrastructure.Data;
-using FluentResults;
-using FluentValidation;
-using Mapster;
-using Microsoft.AspNetCore.DataProtection;
-using Microsoft.EntityFrameworkCore;
-using System.Net.Http.Headers;
-using System.Text;
-using System.Text.Json;
-using Azure;
-using Azure.AI.OpenAI;
-using Azure.Core;
-using Azure.Identity;
-using OpenAI.Chat;
 
 namespace Tyto.Api.Application.Services;
 
@@ -381,7 +381,7 @@ public class LanguageModelService : ILanguageModelService
         {
             return dto.ServiceType switch
             {
-                "AzureOpenAI"  => await TestAzureOpenAIAsync(dto, cancellationToken),
+                "AzureOpenAI" => await TestAzureOpenAIAsync(dto, cancellationToken),
                 "AzureFoundry" => await TestAzureFoundryAsync(dto, cancellationToken),
                 _ => Result.Ok(new TestLanguageModelConnectionResultDto(
                     false,
@@ -420,15 +420,15 @@ public class LanguageModelService : ILanguageModelService
             if (dto.AuthMethod == "ApiKey")
             {
                 var apiKey = new AzureKeyCredential(dto.ApiKey!);
-                
+
                 // If API version is provided, try to use it (Azure AI Foundry may need specific versions)
                 // If not provided or invalid, let the SDK use its default
                 if (!string.IsNullOrWhiteSpace(dto.ApiVersion))
                 {
-                    _logger.LogInformation("Testing Azure OpenAI connection with endpoint {Endpoint}, deployment {Deployment}, API version {ApiVersion}", 
+                    _logger.LogInformation("Testing Azure OpenAI connection with endpoint {Endpoint}, deployment {Deployment}, API version {ApiVersion}",
                         dto.Endpoint, dto.DeploymentName, dto.ApiVersion);
                 }
-                
+
                 client = new AzureOpenAIClient(new Uri(dto.Endpoint), apiKey);
             }
             else // MicrosoftEntraId
@@ -468,15 +468,15 @@ public class LanguageModelService : ILanguageModelService
         }
         catch (RequestFailedException ex)
         {
-            _logger.LogWarning("Azure OpenAI connection test failed: {Message} | Status: {Status} | ErrorCode: {ErrorCode}", 
+            _logger.LogWarning("Azure OpenAI connection test failed: {Message} | Status: {Status} | ErrorCode: {ErrorCode}",
                 ex.Message, ex.Status, ex.ErrorCode);
-            
+
             var errorMessage = $"Connection failed: HTTP {ex.Status} ({ex.ErrorCode ?? "Unknown"})";
             if (!string.IsNullOrWhiteSpace(ex.Message))
             {
                 errorMessage += $"\n\n{ex.Message}";
             }
-            
+
             return Result.Ok(new TestLanguageModelConnectionResultDto(
                 false,
                 errorMessage,
@@ -495,112 +495,112 @@ public class LanguageModelService : ILanguageModelService
     private async Task<Result<TestLanguageModelConnectionResultDto>> TestAzureFoundryAsync(
     TestLanguageModelConnectionDto dto,
     CancellationToken cancellationToken)
-{
-    try
     {
-        if (string.IsNullOrWhiteSpace(dto.DeploymentName))
-            return Result.Ok(new TestLanguageModelConnectionResultDto(
-                false,
-                "Deployment name is required for Azure AI Foundry.",
-                400));
-
-        var url = $"{dto.Endpoint.TrimEnd('/')}/openai/v1/chat/completions";
-
-        var httpClient = _httpClientFactory.CreateClient(ExternalHttpClients.ConnectionTest);
-
-        if (dto.AuthMethod == "ApiKey")
+        try
         {
-            httpClient.DefaultRequestHeaders.Add("api-key", dto.ApiKey!);
-        }
-        else // MicrosoftEntraId
-        {
-            var tokenResult = await _tokenCredential.GetTokenAsync(
-                new TokenRequestContext(
-                    ["https://cognitiveservices.azure.com/.default"]),
-                cancellationToken);
+            if (string.IsNullOrWhiteSpace(dto.DeploymentName))
+                return Result.Ok(new TestLanguageModelConnectionResultDto(
+                    false,
+                    "Deployment name is required for Azure AI Foundry.",
+                    400));
 
-            httpClient.DefaultRequestHeaders.Authorization =
-                new AuthenticationHeaderValue(
-                    "Bearer",
-                    tokenResult.Token);
-        }
+            var url = $"{dto.Endpoint.TrimEnd('/')}/openai/v1/chat/completions";
 
-        var requestBody = JsonSerializer.Serialize(new
-        {
-            model = dto.DeploymentName,
-            messages = new[]
+            var httpClient = _httpClientFactory.CreateClient(ExternalHttpClients.ConnectionTest);
+
+            if (dto.AuthMethod == "ApiKey")
             {
+                httpClient.DefaultRequestHeaders.Add("api-key", dto.ApiKey!);
+            }
+            else // MicrosoftEntraId
+            {
+                var tokenResult = await _tokenCredential.GetTokenAsync(
+                    new TokenRequestContext(
+                        ["https://cognitiveservices.azure.com/.default"]),
+                    cancellationToken);
+
+                httpClient.DefaultRequestHeaders.Authorization =
+                    new AuthenticationHeaderValue(
+                        "Bearer",
+                        tokenResult.Token);
+            }
+
+            var requestBody = JsonSerializer.Serialize(new
+            {
+                model = dto.DeploymentName,
+                messages = new[]
+                {
                 new
                 {
                     role = "user",
                     content = "Respond with OK only."
                 }
             }
-        });
+            });
 
-        var httpResponse = await httpClient.PostAsync(
-            url,
-            new StringContent(
-                requestBody,
-                Encoding.UTF8,
-                "application/json"),
-            cancellationToken);
+            var httpResponse = await httpClient.PostAsync(
+                url,
+                new StringContent(
+                    requestBody,
+                    Encoding.UTF8,
+                    "application/json"),
+                cancellationToken);
 
-        var responseBody = await httpResponse.Content
-            .ReadAsStringAsync(cancellationToken);
+            var responseBody = await httpResponse.Content
+                .ReadAsStringAsync(cancellationToken);
 
-        var statusCode = (int)httpResponse.StatusCode;
+            var statusCode = (int)httpResponse.StatusCode;
 
-        if (httpResponse.IsSuccessStatusCode)
-        {
-            var modelName = dto.DeploymentName;
-
-            try
+            if (httpResponse.IsSuccessStatusCode)
             {
-                using var doc = JsonDocument.Parse(responseBody);
+                var modelName = dto.DeploymentName;
 
-                if (doc.RootElement.TryGetProperty(
-                        "model",
-                        out var modelProp))
+                try
                 {
-                    modelName = modelProp.GetString() ?? modelName;
+                    using var doc = JsonDocument.Parse(responseBody);
+
+                    if (doc.RootElement.TryGetProperty(
+                            "model",
+                            out var modelProp))
+                    {
+                        modelName = modelProp.GetString() ?? modelName;
+                    }
                 }
-            }
-            catch
-            {
-                // Model name unavailable in the response.
+                catch
+                {
+                    // Model name unavailable in the response.
+                }
+
+                _logger.LogInformation(
+                    "Azure AI Foundry connection test successful for endpoint {Endpoint}",
+                    dto.Endpoint);
+
+                return Result.Ok(new TestLanguageModelConnectionResultDto(
+                    true,
+                    $"Connection successful. Model: {modelName}",
+                    200));
             }
 
-            _logger.LogInformation(
-                "Azure AI Foundry connection test successful for endpoint {Endpoint}",
-                dto.Endpoint);
+            _logger.LogWarning(
+                "Azure AI Foundry connection test failed: Status {Status}, Body {Body}",
+                statusCode,
+                responseBody);
 
             return Result.Ok(new TestLanguageModelConnectionResultDto(
-                true,
-                $"Connection successful. Model: {modelName}",
-                200));
+                false,
+                $"Connection failed: HTTP {statusCode}\n\n{responseBody}",
+                statusCode));
         }
+        catch (Exception ex)
+        {
+            _logger.LogError(
+                ex,
+                "Error testing Azure AI Foundry connection");
 
-        _logger.LogWarning(
-            "Azure AI Foundry connection test failed: Status {Status}, Body {Body}",
-            statusCode,
-            responseBody);
-
-        return Result.Ok(new TestLanguageModelConnectionResultDto(
-            false,
-            $"Connection failed: HTTP {statusCode}\n\n{responseBody}",
-            statusCode));
+            return Result.Ok(new TestLanguageModelConnectionResultDto(
+                false,
+                $"Connection test error: {ex.Message}",
+                null));
+        }
     }
-    catch (Exception ex)
-    {
-        _logger.LogError(
-            ex,
-            "Error testing Azure AI Foundry connection");
-
-        return Result.Ok(new TestLanguageModelConnectionResultDto(
-            false,
-            $"Connection test error: {ex.Message}",
-            null));
-    }
-}
 }

@@ -1,15 +1,15 @@
 using System.Net;
 using System.Text;
-using Tyto.Api.Application.Common.Errors;
-using Tyto.Api.Application.Services.Metadata;
-using Tyto.Api.Domain.Entities;
-using Tyto.Api.Domain.Enums;
 using FluentAssertions;
 using FluentResults;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
+using Tyto.Api.Application.Common.Errors;
+using Tyto.Api.Application.Services.Metadata;
+using Tyto.Api.Domain.Entities;
+using Tyto.Api.Domain.Enums;
 
 namespace Tyto.Api.Tests.Services;
 

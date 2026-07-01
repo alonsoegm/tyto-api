@@ -1,8 +1,8 @@
-using Tyto.Api.Application.Common.Constants;
-using Tyto.Api.Application.Common.Errors;
 using FluentResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Tyto.Api.Application.Common.Constants;
+using Tyto.Api.Application.Common.Errors;
 
 namespace Tyto.Api.Application.Common;
 

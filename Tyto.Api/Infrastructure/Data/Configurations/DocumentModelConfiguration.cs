@@ -1,6 +1,6 @@
-using Tyto.Api.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Tyto.Api.Domain.Entities;
 
 namespace Tyto.Api.Infrastructure.Data.Configurations;
 

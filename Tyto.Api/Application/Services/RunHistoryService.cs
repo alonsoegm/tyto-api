@@ -1,12 +1,12 @@
+using FluentResults;
+using Mapster;
+using Microsoft.EntityFrameworkCore;
 using Tyto.Api.Application.Common;
 using Tyto.Api.Application.Common.Errors;
 using Tyto.Api.Application.DTOs.RunHistory;
 using Tyto.Api.Application.Interfaces;
 using Tyto.Api.Domain.Entities;
 using Tyto.Api.Infrastructure.Data;
-using FluentResults;
-using Mapster;
-using Microsoft.EntityFrameworkCore;
 
 namespace Tyto.Api.Application.Services;
 

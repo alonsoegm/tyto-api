@@ -68,7 +68,17 @@ $RECYCLE.BIN/
 !.vscode/extensions.json
 !.vscode/launch.json
 !.vscode/tasks.json
+!.vscode/settings.json
+
+## Husky.NET internal (generated on `dotnet husky install`)
+.husky/_/
 
 ## Publish output
 publish/
 **/publish/
+
+## Test & coverage output
+TestResults/
+**/TestResults/
+*.trx
+coverage.cobertura.xml

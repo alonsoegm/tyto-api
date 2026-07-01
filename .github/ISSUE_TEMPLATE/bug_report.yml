@@ -1,0 +1,42 @@
+name: 🐛 Bug report
+description: Report a defect in the API
+title: "fix: <short summary>"
+labels: [bug]
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear description of the bug and the actual behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: Include the endpoint/request, payload, and any relevant config.
+      placeholder: |
+        1. Call `GET /api/...`
+        2. With body ...
+        3. See error ...
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / stack trace
+      description: Paste relevant logs. Redact secrets and connection strings.
+      render: shell
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      placeholder: "e.g. Development / Azure Container Apps, .NET 10.0.301"
+    validations:
+      required: true

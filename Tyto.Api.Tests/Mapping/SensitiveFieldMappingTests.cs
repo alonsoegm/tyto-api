@@ -1,9 +1,9 @@
 using System.Text.Json;
+using FluentAssertions;
+using Mapster;
 using Tyto.Api.Application.DTOs.LanguageModel;
 using Tyto.Api.Domain.Entities;
 using Tyto.Api.Domain.Enums;
-using FluentAssertions;
-using Mapster;
 
 namespace Tyto.Api.Tests.Mapping;
 

@@ -1,6 +1,6 @@
 using System.Threading.RateLimiting;
-using Tyto.Api.Application.Common.Constants;
 using Microsoft.AspNetCore.RateLimiting;
+using Tyto.Api.Application.Common.Constants;
 
 namespace Tyto.Api.Extensions;
 

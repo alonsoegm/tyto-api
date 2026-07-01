@@ -1,8 +1,8 @@
+using Microsoft.AspNetCore.Mvc;
 using Tyto.Api.Application.Common;
 using Tyto.Api.Application.DTOs.AuditLog;
 using Tyto.Api.Application.Interfaces;
 using Tyto.Api.Domain.Enums;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Tyto.Api.Controllers;
 

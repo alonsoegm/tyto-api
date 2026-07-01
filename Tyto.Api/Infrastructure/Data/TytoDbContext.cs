@@ -1,5 +1,5 @@
-using Tyto.Api.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Tyto.Api.Domain.Entities;
 
 namespace Tyto.Api.Infrastructure.Data;
 

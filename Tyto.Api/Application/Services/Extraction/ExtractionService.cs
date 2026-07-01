@@ -1,13 +1,13 @@
 using System.Diagnostics;
 using System.Text.Json.Nodes;
+using FluentResults;
+using Microsoft.EntityFrameworkCore;
 using Tyto.Api.Application.Common.Errors;
 using Tyto.Api.Application.DTOs.Extraction;
 using Tyto.Api.Application.Interfaces;
 using Tyto.Api.Application.Services.Extraction.Parsing;
 using Tyto.Api.Domain.Entities;
 using Tyto.Api.Infrastructure.Data;
-using FluentResults;
-using Microsoft.EntityFrameworkCore;
 
 namespace Tyto.Api.Application.Services.Extraction;
 

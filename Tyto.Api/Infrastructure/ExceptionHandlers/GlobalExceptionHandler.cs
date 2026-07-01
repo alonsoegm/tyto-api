@@ -1,6 +1,6 @@
-using Tyto.Api.Application.Common.Constants;
 using FluentValidation;
 using Microsoft.AspNetCore.Diagnostics;
+using Tyto.Api.Application.Common.Constants;
 
 namespace Tyto.Api.Infrastructure.ExceptionHandlers;
 

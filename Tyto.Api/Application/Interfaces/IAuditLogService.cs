@@ -1,7 +1,7 @@
+using FluentResults;
 using Tyto.Api.Application.Common;
 using Tyto.Api.Application.DTOs.AuditLog;
 using Tyto.Api.Domain.Enums;
-using FluentResults;
 
 namespace Tyto.Api.Application.Interfaces;
 

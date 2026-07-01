@@ -8,6 +8,9 @@
     <AnalysisLevel>latest</AnalysisLevel>
     <!-- Fail the build on any warning (compiler, analyzer, or NuGet). Keeps the codebase clean. -->
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <!-- Generate a committed packages.lock.json per project for reproducible, verifiable restores.
+         CI restores in locked mode so the lock file must be regenerated intentionally. -->
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
   </PropertyGroup>
 
 </Project>

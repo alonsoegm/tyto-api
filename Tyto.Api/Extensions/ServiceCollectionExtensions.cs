@@ -1,3 +1,4 @@
+using FluentValidation;
 using Tyto.Api.Application.Common.Constants;
 using Tyto.Api.Application.Interfaces;
 using Tyto.Api.Application.Services;
@@ -6,7 +7,6 @@ using Tyto.Api.Application.Services.Extraction.Parsing;
 using Tyto.Api.Application.Services.Metadata;
 using Tyto.Api.Infrastructure.Data;
 using Tyto.Api.Infrastructure.Mapping;
-using FluentValidation;
 
 namespace Tyto.Api.Extensions;
 

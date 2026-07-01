@@ -1,0 +1,18 @@
+{
+   "$schema": "https://alirezanet.github.io/Husky.Net/schema.json",
+   "tasks": [
+      {
+         "name": "format-staged",
+         "group": "pre-commit",
+         "command": "dotnet",
+         "args": [ "format", "Tyto.sln", "--include", "${staged}", "--verify-no-changes" ],
+         "include": [ "**/*.cs" ]
+      },
+      {
+         "name": "conventional-commit-msg",
+         "group": "commit-msg",
+         "command": "dotnet",
+         "args": [ "husky", "exec", ".husky/commit-lint.csx", "--args", "${args}" ]
+      }
+   ]
+}

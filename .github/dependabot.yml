@@ -1,0 +1,32 @@
+version: 2
+updates:
+  # NuGet dependencies across the solution.
+  - package-ecosystem: nuget
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: chore
+      include: scope
+    groups:
+      # Batch low-risk minor/patch bumps into a single PR to reduce noise.
+      minor-and-patch:
+        update-types:
+          - minor
+          - patch
+      # Keep the EF Core / SqlClient stack aligned as a group.
+      entity-framework:
+        patterns:
+          - "Microsoft.EntityFrameworkCore*"
+          - "Microsoft.Data.SqlClient*"
+
+  # Keep GitHub Actions pinned to current versions.
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+    commit-message:
+      prefix: ci

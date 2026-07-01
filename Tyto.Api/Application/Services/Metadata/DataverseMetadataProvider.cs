@@ -2,15 +2,15 @@ using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
+using FluentResults;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.Identity.Client;
 using Tyto.Api.Application.Common.Constants;
 using Tyto.Api.Application.Common.Errors;
 using Tyto.Api.Application.DTOs.Metadata;
 using Tyto.Api.Application.Interfaces;
 using Tyto.Api.Domain.Entities;
 using Tyto.Api.Domain.Enums;
-using FluentResults;
-using Microsoft.AspNetCore.DataProtection;
-using Microsoft.Identity.Client;
 
 namespace Tyto.Api.Application.Services.Metadata;
 

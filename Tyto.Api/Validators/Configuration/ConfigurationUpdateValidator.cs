@@ -1,5 +1,5 @@
-using Tyto.Api.Application.DTOs.Configuration;
 using FluentValidation;
+using Tyto.Api.Application.DTOs.Configuration;
 
 namespace Tyto.Api.Validators.Configuration;
 
