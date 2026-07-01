@@ -1,9 +1,9 @@
-using Tyto.Api.Infrastructure.Data;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Tyto.Api.Infrastructure.Data;
 
 namespace Tyto.Api.Tests.Integration;
 

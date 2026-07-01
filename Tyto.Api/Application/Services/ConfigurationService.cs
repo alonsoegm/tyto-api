@@ -1,4 +1,8 @@
 using System.Text.Json;
+using FluentResults;
+using FluentValidation;
+using Mapster;
+using Microsoft.EntityFrameworkCore;
 using Tyto.Api.Application.Common;
 using Tyto.Api.Application.Common.Errors;
 using Tyto.Api.Application.Common.Validation;
@@ -7,10 +11,6 @@ using Tyto.Api.Application.Interfaces;
 using Tyto.Api.Domain.Entities;
 using Tyto.Api.Domain.Enums;
 using Tyto.Api.Infrastructure.Data;
-using FluentResults;
-using FluentValidation;
-using Mapster;
-using Microsoft.EntityFrameworkCore;
 
 namespace Tyto.Api.Application.Services;
 

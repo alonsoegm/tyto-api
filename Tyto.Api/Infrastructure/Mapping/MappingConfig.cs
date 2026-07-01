@@ -1,8 +1,8 @@
+using Mapster;
 using Tyto.Api.Application.DTOs.DatabaseConnection;
 using Tyto.Api.Application.DTOs.DocumentModel;
 using Tyto.Api.Application.DTOs.LanguageModel;
 using Tyto.Api.Domain.Entities;
-using Mapster;
 
 namespace Tyto.Api.Infrastructure.Mapping;
 

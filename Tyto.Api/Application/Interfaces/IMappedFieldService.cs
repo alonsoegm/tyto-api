@@ -1,6 +1,6 @@
+using FluentResults;
 using Tyto.Api.Application.Common;
 using Tyto.Api.Application.DTOs.MappedField;
-using FluentResults;
 
 namespace Tyto.Api.Application.Interfaces;
 

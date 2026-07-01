@@ -1,5 +1,5 @@
-using Tyto.Api.Application.DTOs.Metadata;
 using FluentResults;
+using Tyto.Api.Application.DTOs.Metadata;
 
 namespace Tyto.Api.Application.Interfaces;
 

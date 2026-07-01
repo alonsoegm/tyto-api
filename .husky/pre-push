@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+. "$(dirname "$0")/_/husky.sh"
+
+## Don't push a red branch: enforce the build contract (warnings-as-errors) and run the tests.
+echo "🏗️  pre-push: building (warnings-as-errors) + running tests..."
+dotnet build Tyto.sln -c Release || exit 1
+dotnet test Tyto.sln -c Release --no-build --settings .runsettings || exit 1

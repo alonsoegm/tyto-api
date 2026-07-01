@@ -1,3 +1,12 @@
+using System.Net;
+using System.Text.Json;
+using Azure.Core;
+using Azure.Identity;
+using FluentResults;
+using FluentValidation;
+using Mapster;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.EntityFrameworkCore;
 using Tyto.Api.Application.Common;
 using Tyto.Api.Application.Common.Constants;
 using Tyto.Api.Application.Common.Errors;
@@ -7,15 +16,6 @@ using Tyto.Api.Application.Interfaces;
 using Tyto.Api.Domain.Entities;
 using Tyto.Api.Domain.Enums;
 using Tyto.Api.Infrastructure.Data;
-using Azure.Core;
-using Azure.Identity;
-using FluentResults;
-using FluentValidation;
-using Mapster;
-using Microsoft.AspNetCore.DataProtection;
-using Microsoft.EntityFrameworkCore;
-using System.Net;
-using System.Text.Json;
 
 namespace Tyto.Api.Application.Services;
 

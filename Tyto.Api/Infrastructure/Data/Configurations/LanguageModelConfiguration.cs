@@ -1,7 +1,7 @@
-using Tyto.Api.Domain.Entities;
-using Tyto.Api.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Tyto.Api.Domain.Entities;
+using Tyto.Api.Domain.Enums;
 
 namespace Tyto.Api.Infrastructure.Data.Configurations;
 

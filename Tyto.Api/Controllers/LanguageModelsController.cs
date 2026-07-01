@@ -1,10 +1,10 @@
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Tyto.Api.Application.Common;
 using Tyto.Api.Application.Common.Constants;
 using Tyto.Api.Application.DTOs.LanguageModel;
 using Tyto.Api.Application.Interfaces;
 using Tyto.Api.Extensions;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.RateLimiting;
 
 namespace Tyto.Api.Controllers;
 

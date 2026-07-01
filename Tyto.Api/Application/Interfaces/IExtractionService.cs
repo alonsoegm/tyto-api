@@ -1,5 +1,5 @@
-using Tyto.Api.Application.DTOs.Extraction;
 using FluentResults;
+using Tyto.Api.Application.DTOs.Extraction;
 
 namespace Tyto.Api.Application.Interfaces;
 

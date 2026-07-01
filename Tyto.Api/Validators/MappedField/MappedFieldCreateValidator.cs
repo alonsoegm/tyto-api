@@ -1,5 +1,5 @@
-using Tyto.Api.Application.DTOs.MappedField;
 using FluentValidation;
+using Tyto.Api.Application.DTOs.MappedField;
 
 namespace Tyto.Api.Validators.MappedField;
 

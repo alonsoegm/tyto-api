@@ -7,7 +7,7 @@ public class DatabaseConnection : BaseEntity
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public ConnectionType ConnectionType { get; set; }
-    
+
     // Test connection results (aligned with LanguageModel/DocumentModel pattern)
     public DateTime? LastTestDate { get; set; }
     public string? LastTestStatus { get; set; }

@@ -1,0 +1,80 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Cancel superseded runs on the same ref (e.g. rapid pushes to a PR branch).
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+
+jobs:
+  build-test:
+    name: Build, format & test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Reads the SDK version from global.json (10.0.301).
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      # Cache NuGet packages keyed on the committed lock files for reproducible restores.
+      - name: Cache NuGet
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/packages.lock.json') }}
+          restore-keys: nuget-${{ runner.os }}-
+
+      # --locked-mode fails if packages.lock.json is out of date with the csproj.
+      - name: Restore
+        run: dotnet restore Tyto.sln --locked-mode
+
+      # Formatting gate: the tree must already match .editorconfig.
+      - name: Verify formatting
+        run: dotnet format Tyto.sln --verify-no-changes --no-restore
+
+      # Inherits TreatWarningsAsErrors + EnforceCodeStyleInBuild from Directory.Build.props.
+      - name: Build
+        run: dotnet build Tyto.sln -c Release --no-restore
+
+      - name: Test (+ coverage)
+        run: >
+          dotnet test Tyto.sln -c Release --no-build
+          --settings .runsettings
+          --logger "trx;LogFileName=test-results.trx"
+          --results-directory ./TestResults
+
+      - name: Publish test results
+        uses: dorny/test-reporter@v1
+        if: ${{ !cancelled() }}
+        with:
+          name: test-results
+          path: '**/TestResults/**/*.trx'
+          reporter: dotnet-trx
+
+      - name: Coverage summary
+        uses: irongut/CodeCoverageSummary@v1.3.0
+        if: ${{ !cancelled() }}
+        with:
+          filename: '**/TestResults/**/coverage.cobertura.xml'
+          badge: true
+          format: markdown
+          output: both
+
+      - name: Post coverage to job summary
+        if: ${{ !cancelled() }}
+        run: cat code-coverage-results.md >> "$GITHUB_STEP_SUMMARY" || true

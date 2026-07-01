@@ -1,8 +1,8 @@
+using Microsoft.AspNetCore.Mvc;
 using Tyto.Api.Application.Common;
 using Tyto.Api.Application.Common.Constants;
 using Tyto.Api.Application.DTOs.RunHistory;
 using Tyto.Api.Application.Interfaces;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Tyto.Api.Controllers;
 
@@ -22,7 +22,7 @@ public class RunHistoryController : ControllerBase
         [FromQuery] QueryParameters parameters, [FromQuery] Guid? configurationId, CancellationToken cancellationToken)
     {
         var result = await _service.GetAllAsync(parameters, configurationId, cancellationToken);
-        
+
         if (result.IsFailed)
             return StatusCode(500, result.ToApiResponse());
 
@@ -40,7 +40,7 @@ public class RunHistoryController : ControllerBase
         if (result.IsFailed)
         {
             var errorCode = result.GetErrorCode();
-            return errorCode == ErrorCodes.NotFound 
+            return errorCode == ErrorCodes.NotFound
                 ? NotFound(result.ToApiResponse())
                 : StatusCode(500, result.ToApiResponse());
         }

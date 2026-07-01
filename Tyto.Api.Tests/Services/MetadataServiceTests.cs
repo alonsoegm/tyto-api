@@ -1,3 +1,6 @@
+using FluentAssertions;
+using FluentResults;
+using Microsoft.Extensions.Caching.Memory;
 using Tyto.Api.Application.Common.Errors;
 using Tyto.Api.Application.DTOs.Metadata;
 using Tyto.Api.Application.Interfaces;
@@ -6,9 +9,6 @@ using Tyto.Api.Domain.Entities;
 using Tyto.Api.Domain.Enums;
 using Tyto.Api.Infrastructure.Data;
 using Tyto.Api.Tests.Infrastructure;
-using FluentAssertions;
-using FluentResults;
-using Microsoft.Extensions.Caching.Memory;
 
 namespace Tyto.Api.Tests.Services;
 

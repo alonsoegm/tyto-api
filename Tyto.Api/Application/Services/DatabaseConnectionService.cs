@@ -1,3 +1,11 @@
+using System.Net.Http.Headers;
+using System.Text.Json;
+using FluentResults;
+using FluentValidation;
+using Mapster;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Client;
 using Tyto.Api.Application.Common;
 using Tyto.Api.Application.Common.Constants;
 using Tyto.Api.Application.Common.Errors;
@@ -7,14 +15,6 @@ using Tyto.Api.Application.Interfaces;
 using Tyto.Api.Domain.Entities;
 using Tyto.Api.Domain.Enums;
 using Tyto.Api.Infrastructure.Data;
-using FluentResults;
-using FluentValidation;
-using Mapster;
-using Microsoft.AspNetCore.DataProtection;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Identity.Client;
-using System.Net.Http.Headers;
-using System.Text.Json;
 
 namespace Tyto.Api.Application.Services;
 
@@ -265,9 +265,9 @@ public class DatabaseConnectionService : IDatabaseConnectionService
         // Should use Salesforce REST API to make a simple query (e.g., SELECT Id FROM User LIMIT 1)
         // Handle OAuth2 authentication based on SF_AuthMethod
         _logger.LogInformation("Salesforce connection test requested for {InstanceUrl}", dto.SF_InstanceUrl);
-        
+
         await Task.CompletedTask; // Remove when implementing
-        
+
         return Result.Ok(new TestDatabaseConnectionResultDto(
             false,
             "Salesforce connection testing not yet implemented. Integration with Salesforce SDK pending.",

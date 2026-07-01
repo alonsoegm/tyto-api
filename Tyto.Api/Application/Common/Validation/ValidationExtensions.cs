@@ -1,6 +1,6 @@
-using Tyto.Api.Application.Common.Errors;
 using FluentResults;
 using FluentValidation;
+using Tyto.Api.Application.Common.Errors;
 
 namespace Tyto.Api.Application.Common.Validation;
 

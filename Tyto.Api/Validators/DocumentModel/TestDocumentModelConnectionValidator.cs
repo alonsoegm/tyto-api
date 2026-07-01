@@ -1,5 +1,5 @@
-using Tyto.Api.Application.DTOs.DocumentModel;
 using FluentValidation;
+using Tyto.Api.Application.DTOs.DocumentModel;
 
 namespace Tyto.Api.Validators.DocumentModel;
 

@@ -1,10 +1,10 @@
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Tyto.Api.Application.Common;
 using Tyto.Api.Application.Common.Constants;
 using Tyto.Api.Application.DTOs.DocumentModel;
 using Tyto.Api.Application.Interfaces;
 using Tyto.Api.Extensions;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.RateLimiting;
 
 namespace Tyto.Api.Controllers;
 
@@ -26,7 +26,7 @@ public class DocumentModelsController : ControllerBase
         [FromQuery] QueryParameters parameters, CancellationToken cancellationToken)
     {
         var result = await _service.GetAllAsync(parameters, cancellationToken);
-        
+
         if (result.IsFailed)
             return StatusCode(500, result.ToApiResponse());
 
@@ -44,7 +44,7 @@ public class DocumentModelsController : ControllerBase
         if (result.IsFailed)
         {
             var errorCode = result.GetErrorCode();
-            return errorCode == ErrorCodes.NotFound 
+            return errorCode == ErrorCodes.NotFound
                 ? NotFound(result.ToApiResponse())
                 : StatusCode(500, result.ToApiResponse());
         }

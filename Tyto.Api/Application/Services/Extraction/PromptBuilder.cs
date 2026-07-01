@@ -1,5 +1,5 @@
-using Tyto.Api.Domain.Entities;
 using OpenAI.Chat;
+using Tyto.Api.Domain.Entities;
 
 namespace Tyto.Api.Application.Services.Extraction;
 

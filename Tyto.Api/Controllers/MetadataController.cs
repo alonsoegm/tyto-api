@@ -1,7 +1,7 @@
+using Microsoft.AspNetCore.Mvc;
 using Tyto.Api.Application.Common;
 using Tyto.Api.Application.DTOs.Metadata;
 using Tyto.Api.Application.Interfaces;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Tyto.Api.Controllers;
 

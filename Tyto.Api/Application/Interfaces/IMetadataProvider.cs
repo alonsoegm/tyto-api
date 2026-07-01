@@ -1,7 +1,7 @@
+using FluentResults;
 using Tyto.Api.Application.DTOs.Metadata;
 using Tyto.Api.Domain.Entities;
 using Tyto.Api.Domain.Enums;
-using FluentResults;
 
 namespace Tyto.Api.Application.Interfaces;
 

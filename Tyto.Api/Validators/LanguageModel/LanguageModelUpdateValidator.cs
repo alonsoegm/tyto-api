@@ -1,6 +1,6 @@
+using FluentValidation;
 using Tyto.Api.Application.DTOs.LanguageModel;
 using Tyto.Api.Domain.Enums;
-using FluentValidation;
 
 namespace Tyto.Api.Validators.LanguageModel;
 

@@ -1,7 +1,7 @@
+using System.Text.Json.Serialization;
+using Serilog;
 using Tyto.Api.Extensions;
 using Tyto.Api.Infrastructure.ExceptionHandlers;
-using Serilog;
-using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 

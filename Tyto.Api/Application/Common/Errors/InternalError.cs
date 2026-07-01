@@ -1,5 +1,5 @@
-using Tyto.Api.Application.Common.Constants;
 using FluentResults;
+using Tyto.Api.Application.Common.Constants;
 
 namespace Tyto.Api.Application.Common.Errors;
 

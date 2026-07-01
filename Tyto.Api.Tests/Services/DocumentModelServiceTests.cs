@@ -1,13 +1,13 @@
 using System.Net;
+using FluentAssertions;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.Extensions.Logging.Abstractions;
+using Moq;
 using Tyto.Api.Application.DTOs.DocumentModel;
 using Tyto.Api.Application.Interfaces;
 using Tyto.Api.Application.Services;
 using Tyto.Api.Tests.Infrastructure;
 using Tyto.Api.Validators.DocumentModel;
-using FluentAssertions;
-using Microsoft.AspNetCore.DataProtection;
-using Microsoft.Extensions.Logging.Abstractions;
-using Moq;
 
 namespace Tyto.Api.Tests.Services;
 

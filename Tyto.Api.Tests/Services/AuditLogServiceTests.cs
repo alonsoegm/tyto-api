@@ -1,10 +1,10 @@
+using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
 using Tyto.Api.Application.Common;
 using Tyto.Api.Application.Common.Errors;
 using Tyto.Api.Application.Services;
 using Tyto.Api.Domain.Enums;
 using Tyto.Api.Tests.Infrastructure;
-using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
 
 namespace Tyto.Api.Tests.Services;
 

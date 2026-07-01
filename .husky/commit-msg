@@ -1,0 +1,5 @@
+#!/usr/bin/env sh
+. "$(dirname "$0")/_/husky.sh"
+
+## Conventional Commits gate: validate the commit message ($1 = path to COMMIT_EDITMSG).
+dotnet husky run --group commit-msg --args "$1"

@@ -1,6 +1,6 @@
+using FluentValidation;
 using Tyto.Api.Application.DTOs.LanguageModel;
 using Tyto.Api.Domain.Enums;
-using FluentValidation;
 using ManagedIdentityType = Tyto.Api.Domain.Enums.ManagedIdentityType;
 
 namespace Tyto.Api.Validators.LanguageModel;

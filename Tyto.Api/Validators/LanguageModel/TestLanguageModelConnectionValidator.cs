@@ -1,5 +1,5 @@
-using Tyto.Api.Application.DTOs.LanguageModel;
 using FluentValidation;
+using Tyto.Api.Application.DTOs.LanguageModel;
 
 namespace Tyto.Api.Validators.LanguageModel;
 
@@ -52,7 +52,7 @@ public class TestLanguageModelConnectionValidator : AbstractValidator<TestLangua
     }
 
     private static bool BeAValidUrl(string? url) =>
-        Uri.TryCreate(url, UriKind.Absolute, out var uri) && 
+        Uri.TryCreate(url, UriKind.Absolute, out var uri) &&
         (uri.Scheme == Uri.UriSchemeHttps || uri.Scheme == Uri.UriSchemeHttp);
 
     private static bool BeAValidServiceType(string? serviceType) =>

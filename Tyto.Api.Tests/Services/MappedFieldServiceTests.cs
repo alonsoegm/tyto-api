@@ -1,3 +1,8 @@
+using FluentAssertions;
+using FluentResults;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging.Abstractions;
+using Moq;
 using Tyto.Api.Application.Common;
 using Tyto.Api.Application.Common.Errors;
 using Tyto.Api.Application.DTOs.MappedField;
@@ -8,11 +13,6 @@ using Tyto.Api.Domain.Enums;
 using Tyto.Api.Infrastructure.Data;
 using Tyto.Api.Tests.Infrastructure;
 using Tyto.Api.Validators.MappedField;
-using FluentAssertions;
-using FluentResults;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging.Abstractions;
-using Moq;
 
 namespace Tyto.Api.Tests.Services;
 

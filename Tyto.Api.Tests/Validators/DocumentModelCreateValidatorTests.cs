@@ -1,7 +1,7 @@
+using FluentAssertions;
 using Tyto.Api.Application.DTOs.DocumentModel;
 using Tyto.Api.Domain.Enums;
 using Tyto.Api.Validators.DocumentModel;
-using FluentAssertions;
 
 namespace Tyto.Api.Tests.Validators;
 
