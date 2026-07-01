@@ -130,8 +130,13 @@ public class LanguageModelService : ILanguageModelService
             var anyExists = await _db.LanguageModels.AnyAsync(cancellationToken);
             entity.IsDefault = !anyExists || dto.IsDefault;
 
-            await using (var transaction = await _db.Database.BeginTransactionAsync(cancellationToken))
+            // Retrying execution strategy (EnableRetryOnFailure) requires the whole
+            // transaction to run as a single retriable unit; a bare BeginTransaction throws.
+            var strategy = _db.Database.CreateExecutionStrategy();
+            await strategy.ExecuteAsync(async () =>
             {
+                await using var transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
+
                 // Unset the previous default first so the partial unique index is never violated mid-save.
                 if (entity.IsDefault && anyExists)
                 {
@@ -142,7 +147,7 @@ public class LanguageModelService : ILanguageModelService
                 _db.LanguageModels.Add(entity);
                 await _db.SaveChangesAsync(cancellationToken);
                 await transaction.CommitAsync(cancellationToken);
-            }
+            });
 
             _logger.LogInformation("Language model '{Name}' created by {User}", entity.Name, performedBy);
 
@@ -231,8 +236,11 @@ public class LanguageModelService : ILanguageModelService
                 return Result.Fail<LanguageModelResponseDto>(new ConflictError(
                     "Cannot unset the default language model. Set another model as the default instead."));
 
-            await using (var transaction = await _db.Database.BeginTransactionAsync(cancellationToken))
+            var strategy = _db.Database.CreateExecutionStrategy();
+            await strategy.ExecuteAsync(async () =>
             {
+                await using var transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
+
                 // Unset the previous default first so the partial unique index is never violated mid-save.
                 if (!wasDefault && entity.IsDefault)
                 {
@@ -242,7 +250,7 @@ public class LanguageModelService : ILanguageModelService
 
                 await _db.SaveChangesAsync(cancellationToken);
                 await transaction.CommitAsync(cancellationToken);
-            }
+            });
 
             // Test connection automatically after update
             if (!string.IsNullOrWhiteSpace(apiKeyForTest))
@@ -326,8 +334,11 @@ public class LanguageModelService : ILanguageModelService
             if (entity.IsDefault)
                 return Result.Ok(entity.Adapt<LanguageModelResponseDto>());
 
-            await using (var transaction = await _db.Database.BeginTransactionAsync(cancellationToken))
+            var strategy = _db.Database.CreateExecutionStrategy();
+            await strategy.ExecuteAsync(async () =>
             {
+                await using var transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
+
                 // Unset the previous default first so the partial unique index is never violated mid-save.
                 await UnsetCurrentDefaultAsync(id, cancellationToken);
                 await _db.SaveChangesAsync(cancellationToken);
@@ -336,7 +347,7 @@ public class LanguageModelService : ILanguageModelService
                 entity.UpdatedBy = performedBy;
                 await _db.SaveChangesAsync(cancellationToken);
                 await transaction.CommitAsync(cancellationToken);
-            }
+            });
 
             _logger.LogInformation("Language model '{Name}' set as default by {User}", entity.Name, performedBy);
 
