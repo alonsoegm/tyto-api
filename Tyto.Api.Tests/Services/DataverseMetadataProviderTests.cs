@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Tyto.Api.Application.Common.Errors;
 using Tyto.Api.Application.Services.Metadata;
+using Tyto.Api.Domain.Configs;
 using Tyto.Api.Domain.Entities;
 using Tyto.Api.Domain.Enums;
 
@@ -87,8 +88,7 @@ public class DataverseMetadataProviderTests
         var provider = new DataverseMetadataProvider(
             DataProtection(), Mock.Of<IHttpClientFactory>(), NullLogger<DataverseMetadataProvider>.Instance);
 
-        var connection = DataverseConnection();
-        connection.DV_AuthMethod = DataverseAuthMethod.Certificate;
+        var connection = DataverseConnection(DataverseAuthMethod.Certificate);
 
         var result = await provider.GetEntitiesAsync(connection);
 
@@ -96,16 +96,19 @@ public class DataverseMetadataProviderTests
         result.Errors.Should().ContainSingle().Which.Should().BeOfType<ValidationError>();
     }
 
-    private static DatabaseConnection DataverseConnection() => new()
+    private static DatabaseConnection DataverseConnection(DataverseAuthMethod authMethod = DataverseAuthMethod.ClientSecret) => new()
     {
         Id = Guid.NewGuid(),
         Name = "Dataverse",
-        ConnectionType = ConnectionType.MsDataverse,
-        DV_AuthMethod = DataverseAuthMethod.ClientSecret,
-        DV_EnvironmentUrl = EnvironmentUrl,
-        DV_TenantId = "tenant",
-        DV_ClientId = "client",
-        DV_ClientSecret = "encrypted-secret"
+        ConnectionType = ConnectionType.Dataverse,
+        Config = ConnectionConfigSerializer.Serialize(new DataverseConfig
+        {
+            AuthMethod = authMethod,
+            EnvironmentUrl = EnvironmentUrl,
+            TenantId = "tenant",
+            ClientId = "client",
+            ClientSecret = "encrypted-secret"
+        })
     };
 
     private static IDataProtectionProvider DataProtection()

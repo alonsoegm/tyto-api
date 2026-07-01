@@ -18,7 +18,7 @@ public class MetadataServiceTests
     public async Task GetEntitiesAsync_WhenConnectionDoesNotExist_ReturnsNotFound()
     {
         using var db = TestDbContextFactory.Create();
-        var service = CreateService(db, new StubProvider(ConnectionType.MsDataverse));
+        var service = CreateService(db, new StubProvider(ConnectionType.Dataverse));
 
         var result = await service.GetEntitiesAsync(Guid.NewGuid());
 
@@ -30,10 +30,10 @@ public class MetadataServiceTests
     public async Task GetEntitiesAsync_SelectsProviderMatchingConnectionType()
     {
         using var db = TestDbContextFactory.Create();
-        var connection = await SeedConnectionAsync(db, ConnectionType.MsDataverse);
+        var connection = await SeedConnectionAsync(db, ConnectionType.Dataverse);
 
         var expected = new List<EntityDto> { new("account", "Account") };
-        var dataverseProvider = new StubProvider(ConnectionType.MsDataverse, expected);
+        var dataverseProvider = new StubProvider(ConnectionType.Dataverse, expected);
         var salesforceProvider = new StubProvider(ConnectionType.Salesforce, new List<EntityDto> { new("Lead", "Lead") });
 
         var service = CreateService(db, salesforceProvider, dataverseProvider);
@@ -48,9 +48,9 @@ public class MetadataServiceTests
     public async Task GetEntitiesAsync_OnSecondCall_ReturnsCachedResultWithoutHittingProvider()
     {
         using var db = TestDbContextFactory.Create();
-        var connection = await SeedConnectionAsync(db, ConnectionType.MsDataverse);
+        var connection = await SeedConnectionAsync(db, ConnectionType.Dataverse);
 
-        var provider = new StubProvider(ConnectionType.MsDataverse, new List<EntityDto> { new("account", "Account") });
+        var provider = new StubProvider(ConnectionType.Dataverse, new List<EntityDto> { new("account", "Account") });
         var service = CreateService(db, provider);
 
         var first = await service.GetEntitiesAsync(connection.Id);
@@ -66,10 +66,10 @@ public class MetadataServiceTests
     public async Task GetEntitiesAsync_CachesPerConnection()
     {
         using var db = TestDbContextFactory.Create();
-        var connectionA = await SeedConnectionAsync(db, ConnectionType.MsDataverse);
-        var connectionB = await SeedConnectionAsync(db, ConnectionType.MsDataverse);
+        var connectionA = await SeedConnectionAsync(db, ConnectionType.Dataverse);
+        var connectionB = await SeedConnectionAsync(db, ConnectionType.Dataverse);
 
-        var provider = new StubProvider(ConnectionType.MsDataverse, new List<EntityDto> { new("account", "Account") });
+        var provider = new StubProvider(ConnectionType.Dataverse, new List<EntityDto> { new("account", "Account") });
         var service = CreateService(db, provider);
 
         await service.GetEntitiesAsync(connectionA.Id);
@@ -82,9 +82,9 @@ public class MetadataServiceTests
     public async Task GetEntitiesAsync_WhenProviderFails_DoesNotCacheResult()
     {
         using var db = TestDbContextFactory.Create();
-        var connection = await SeedConnectionAsync(db, ConnectionType.MsDataverse);
+        var connection = await SeedConnectionAsync(db, ConnectionType.Dataverse);
 
-        var provider = new StubProvider(ConnectionType.MsDataverse) { FailEntities = true };
+        var provider = new StubProvider(ConnectionType.Dataverse) { FailEntities = true };
         var service = CreateService(db, provider);
 
         var first = await service.GetEntitiesAsync(connection.Id);
@@ -99,9 +99,9 @@ public class MetadataServiceTests
     public async Task GetFieldsAsync_DelegatesToMatchingProvider()
     {
         using var db = TestDbContextFactory.Create();
-        var connection = await SeedConnectionAsync(db, ConnectionType.MsDataverse);
+        var connection = await SeedConnectionAsync(db, ConnectionType.Dataverse);
 
-        var provider = new StubProvider(ConnectionType.MsDataverse);
+        var provider = new StubProvider(ConnectionType.Dataverse);
         var service = CreateService(db, provider);
 
         var result = await service.GetFieldsAsync(connection.Id, "account");
@@ -117,7 +117,7 @@ public class MetadataServiceTests
         var connection = await SeedConnectionAsync(db, ConnectionType.Salesforce);
 
         // Only a Dataverse provider is registered, but the connection is Salesforce.
-        var service = CreateService(db, new StubProvider(ConnectionType.MsDataverse));
+        var service = CreateService(db, new StubProvider(ConnectionType.Dataverse));
 
         var result = await service.GetEntitiesAsync(connection.Id);
 

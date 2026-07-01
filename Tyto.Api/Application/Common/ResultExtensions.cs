@@ -32,6 +32,7 @@ public static class ResultExtensions
         {
             NotFoundError notFoundError => (notFoundError.Code, notFoundError.Message),
             ConflictError conflictError => (conflictError.Code, conflictError.Message),
+            ForbiddenError forbiddenError => (forbiddenError.Code, forbiddenError.Message),
             ValidationError validationError => (validationError.Code, validationError.Message),
             InternalError internalError => (internalError.Code, internalError.Message),
             _ => (ErrorCodes.InternalError, error.Message)
@@ -61,6 +62,7 @@ public static class ResultExtensions
         {
             NotFoundError notFoundError => (notFoundError.Code, notFoundError.Message),
             ConflictError conflictError => (conflictError.Code, conflictError.Message),
+            ForbiddenError forbiddenError => (forbiddenError.Code, forbiddenError.Message),
             ValidationError validationError => (validationError.Code, validationError.Message),
             InternalError internalError => (internalError.Code, internalError.Message),
             _ => (ErrorCodes.InternalError, error.Message)
@@ -79,6 +81,7 @@ public static class ResultExtensions
         {
             NotFoundError notFoundError => notFoundError.Code,
             ConflictError conflictError => conflictError.Code,
+            ForbiddenError forbiddenError => forbiddenError.Code,
             ValidationError validationError => validationError.Code,
             InternalError internalError => internalError.Code,
             _ => ErrorCodes.InternalError
@@ -95,6 +98,7 @@ public static class ResultExtensions
         {
             NotFoundError notFoundError => notFoundError.Code,
             ConflictError conflictError => conflictError.Code,
+            ForbiddenError forbiddenError => forbiddenError.Code,
             ValidationError validationError => validationError.Code,
             InternalError internalError => internalError.Code,
             _ => ErrorCodes.InternalError
@@ -134,6 +138,7 @@ public static class ResultExtensions
         {
             NotFoundError e => (StatusCodes.Status404NotFound, e.Code, e.Message),
             ConflictError e => (StatusCodes.Status409Conflict, e.Code, e.Message),
+            ForbiddenError e => (StatusCodes.Status403Forbidden, e.Code, e.Message),
             ValidationError e => (StatusCodes.Status400BadRequest, e.Code, e.Message),
             InternalError e => (StatusCodes.Status500InternalServerError, e.Code, e.Message),
             _ => (StatusCodes.Status500InternalServerError, ErrorCodes.InternalError, "An unexpected error occurred.")

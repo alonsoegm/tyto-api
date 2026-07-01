@@ -1,5 +1,4 @@
 using Mapster;
-using Tyto.Api.Application.DTOs.DatabaseConnection;
 using Tyto.Api.Application.DTOs.DocumentModel;
 using Tyto.Api.Application.DTOs.LanguageModel;
 using Tyto.Api.Domain.Entities;
@@ -36,20 +35,8 @@ public static class MappingConfig
         TypeAdapterConfig<DocumentModelUpdateDto, DocumentModel>.NewConfig()
             .Ignore(dest => dest.ApiKeyEncrypted);
 
-        // DatabaseConnection create/update: secrets handled in service
-        TypeAdapterConfig<DatabaseConnectionCreateDto, DatabaseConnection>.NewConfig()
-            .Ignore(dest => dest.SF_ClientSecret)
-            .Ignore(dest => dest.SF_PrivateKeyFile)
-            .Ignore(dest => dest.SF_Passphrase)
-            .Ignore(dest => dest.DV_ClientSecret)
-            .Ignore(dest => dest.DV_CertificateData);
-
-        TypeAdapterConfig<DatabaseConnectionUpdateDto, DatabaseConnection>.NewConfig()
-            .Ignore(dest => dest.SF_ClientSecret)
-            .Ignore(dest => dest.SF_PrivateKeyFile)
-            .Ignore(dest => dest.SF_Passphrase)
-            .Ignore(dest => dest.DV_ClientSecret)
-            .Ignore(dest => dest.DV_CertificateData);
+        // DatabaseConnection create/update/response are mapped manually in the service (generic Config
+        // payload with per-type secret encryption and masking), so no Mapster config is needed.
 #pragma warning restore CS8603
     }
 }
