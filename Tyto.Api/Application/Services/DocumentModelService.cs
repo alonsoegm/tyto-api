@@ -156,13 +156,19 @@ public class DocumentModelService : IDocumentModelService
 
             if (entity.IsDefault && anyExists)
             {
-                // Unset the previous default first so the partial unique index is never violated mid-save.
-                await using var transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
-                await UnsetCurrentDefaultAsync(null, cancellationToken);
-                await _db.SaveChangesAsync(cancellationToken);
-                _db.DocumentModels.Add(entity);
-                await _db.SaveChangesAsync(cancellationToken);
-                await transaction.CommitAsync(cancellationToken);
+                // Retrying execution strategy (EnableRetryOnFailure) requires the whole
+                // transaction to run as a single retriable unit; a bare BeginTransaction throws.
+                var strategy = _db.Database.CreateExecutionStrategy();
+                await strategy.ExecuteAsync(async () =>
+                {
+                    // Unset the previous default first so the partial unique index is never violated mid-save.
+                    await using var transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
+                    await UnsetCurrentDefaultAsync(null, cancellationToken);
+                    await _db.SaveChangesAsync(cancellationToken);
+                    _db.DocumentModels.Add(entity);
+                    await _db.SaveChangesAsync(cancellationToken);
+                    await transaction.CommitAsync(cancellationToken);
+                });
             }
             else
             {
@@ -226,11 +232,15 @@ public class DocumentModelService : IDocumentModelService
             // Unset the previous default first so the partial unique index is never violated mid-save.
             if (!wasDefault && entity.IsDefault)
             {
-                await using var transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
-                await UnsetCurrentDefaultAsync(id, cancellationToken);
-                await _db.SaveChangesAsync(cancellationToken);
-                await _db.SaveChangesAsync(cancellationToken);
-                await transaction.CommitAsync(cancellationToken);
+                var strategy = _db.Database.CreateExecutionStrategy();
+                await strategy.ExecuteAsync(async () =>
+                {
+                    await using var transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
+                    await UnsetCurrentDefaultAsync(id, cancellationToken);
+                    await _db.SaveChangesAsync(cancellationToken);
+                    await _db.SaveChangesAsync(cancellationToken);
+                    await transaction.CommitAsync(cancellationToken);
+                });
             }
 
             var auditResult = _auditLog.Log(AuditAction.Update, AuditEntityType.DocumentModel, entity.Id, entity.Name, null, performedBy);
@@ -289,8 +299,11 @@ public class DocumentModelService : IDocumentModelService
             if (entity.IsDefault)
                 return Result.Ok(MapToResponseDto(entity));
 
-            await using (var transaction = await _db.Database.BeginTransactionAsync(cancellationToken))
+            var strategy = _db.Database.CreateExecutionStrategy();
+            await strategy.ExecuteAsync(async () =>
             {
+                await using var transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
+
                 // Unset the previous default first so the partial unique index is never violated mid-save.
                 await UnsetCurrentDefaultAsync(id, cancellationToken);
                 await _db.SaveChangesAsync(cancellationToken);
@@ -299,7 +312,7 @@ public class DocumentModelService : IDocumentModelService
                 entity.UpdatedBy = performedBy;
                 await _db.SaveChangesAsync(cancellationToken);
                 await transaction.CommitAsync(cancellationToken);
-            }
+            });
 
             _logger.LogInformation("Document model '{Name}' set as default by {User}", entity.Name, performedBy);
 
