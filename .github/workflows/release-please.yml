@@ -15,7 +15,7 @@ jobs:
     steps:
       # Maintains a release PR (version bump + CHANGELOG) from Conventional Commits,
       # then tags vX.Y.Z + creates the GitHub Release when that PR is merged.
-      - uses: googleapis/release-please-action@v4
+      - uses: googleapis/release-please-action@v5
         with:
           config-file: .github/release-please-config.json
           manifest-file: .github/.release-please-manifest.json
