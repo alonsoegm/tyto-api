@@ -12,7 +12,7 @@ document intelligence platform: LLM endpoints, Document Intelligence models, CRM
 (Salesforce / Microsoft Dataverse), extraction configurations, field mappings, and execution history.
 
 - **Runtime**: .NET 10 / ASP.NET Core
-- **Database**: PostgreSQL via Npgsql EF Core 10 (Code First)
+- **Database**: Azure SQL Database / SQL Server via EF Core 10 SqlServer provider (Code First)
 - **Auth**: Azure AD (Microsoft.Identity.Web — JWT Bearer) behind a config-driven global policy
 - **Architecture**: Single project (`Tyto.Api`) with a layered folder structure, plus a test project (`Tyto.Api.Tests`)
 - **Error model**: Result pattern (FluentResults) → RFC 7807 `ProblemDetails`; no exceptions for control flow
@@ -271,7 +271,7 @@ The acting user is resolved from claims (`AppClaimTypes.ObjectId` → `Email` �
 ## Health Checks
 
 - `GET /health/live` — liveness (no checks; `200` while the process responds).
-- `GET /health/ready` — readiness (PostgreSQL connectivity, tagged `ready`).
+- `GET /health/ready` — readiness (SQL Server connectivity, tagged `ready`).
 - Both anonymous, mapped in `MapHealthCheckEndpoints()`.
 
 ---
@@ -380,15 +380,14 @@ Never use magic strings. Reference constants in `Application/Common/Constants/`
 
 | Package | Purpose |
 |---|---|
-| `Npgsql.EntityFrameworkCore.PostgreSQL` | EF Core provider for PostgreSQL |
-| `Microsoft.EntityFrameworkCore.Relational` | Pinned to align EF Core versions |
+| `Microsoft.EntityFrameworkCore.SqlServer` | EF Core provider for Azure SQL / SQL Server |
 | `Microsoft.Identity.Web` | Azure AD JWT authentication |
 | `Swashbuckle.AspNetCore` | Swagger UI |
 | `FluentValidation.AspNetCore` | DTO validation |
 | `FluentResults` | Result/error model |
 | `Mapster` | Entity ↔ DTO mapping |
 | `Microsoft.AspNetCore.DataProtection` | Secret encryption at rest |
-| `AspNetCore.HealthChecks.NpgSql` | PostgreSQL health check |
+| `AspNetCore.HealthChecks.SqlServer` | SQL Server health check |
 | `Microsoft.Extensions.Http.Resilience` | Polly resilience for outbound HTTP |
 | `Serilog.AspNetCore` | Structured logging |
 | `OpenTelemetry.Extensions.Hosting` + `Instrumentation.AspNetCore` / `.Http` / `.Runtime` + `Exporter.OpenTelemetryProtocol` | Tracing & metrics |

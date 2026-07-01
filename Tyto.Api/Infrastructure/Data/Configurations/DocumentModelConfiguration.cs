@@ -37,6 +37,6 @@ public class DocumentModelConfiguration : IEntityTypeConfiguration<DocumentModel
         // Guarantees at most one default document model at the database level.
         builder.HasIndex(x => x.IsDefault)
             .IsUnique()
-            .HasFilter("\"IsDefault\" = true");
+            .HasFilter("[IsDefault] = 1");
     }
 }

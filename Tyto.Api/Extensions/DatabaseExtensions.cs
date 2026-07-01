@@ -8,7 +8,9 @@ public static class DatabaseExtensions
     public static IServiceCollection AddDatabase(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddDbContext<TytoDbContext>(options =>
-            options.UseNpgsql(configuration.GetConnectionString("TytoDb")));
+            options.UseSqlServer(
+                configuration.GetConnectionString("TytoDb"),
+                sqlOptions => sqlOptions.EnableRetryOnFailure()));
 
         return services;
     }
