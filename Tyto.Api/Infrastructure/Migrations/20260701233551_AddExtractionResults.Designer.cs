@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Tyto.Api.Infrastructure.Data;
 
@@ -11,9 +12,11 @@ using Tyto.Api.Infrastructure.Data;
 namespace Tyto.Api.Infrastructure.Migrations
 {
     [DbContext(typeof(TytoDbContext))]
-    partial class TytoDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260701233551_AddExtractionResults")]
+    partial class AddExtractionResults
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
