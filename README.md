@@ -61,7 +61,7 @@ This service is built to be production-grade, not just functional. It includes:
 | Concern | Technology |
 |---|---|
 | Runtime | .NET 10 / ASP.NET Core |
-| Database | PostgreSQL (Npgsql + EF Core 10, Code First) |
+| Database | Azure SQL Database / SQL Server (EF Core 10 SqlServer provider, Code First) |
 | Authentication | Azure AD — `Microsoft.Identity.Web` (JWT Bearer) |
 | Validation | FluentValidation |
 | Mapping | Mapster |
@@ -181,7 +181,7 @@ are set).
 | Endpoint | Purpose | Checks |
 |---|---|---|
 | `GET /health/live` | Liveness — is the process up? | none (always `200` if responding) |
-| `GET /health/ready` | Readiness — can it serve traffic? | PostgreSQL connectivity |
+| `GET /health/ready` | Readiness — can it serve traffic? | SQL Server connectivity |
 
 Both are anonymous so orchestrators (Kubernetes, Azure Container Apps) can probe them without a token.
 
@@ -295,7 +295,7 @@ Interactive documentation (with Azure AD login) is available at `/swagger` in De
 | `AzureAd:TenantId` | Azure AD tenant identifier. |
 | `AzureAd:ClientId` | App registration client id. |
 | `AzureAd:Audience` | Token audience (`api://<client-id>`). |
-| `ConnectionStrings:TytoDb` | PostgreSQL connection string. |
+| `ConnectionStrings:TytoDb` | Azure SQL / SQL Server connection string. |
 | `Cors:AllowedOrigins` | Array of allowed origins (empty → permissive in Development only). |
 | `Serilog` | Serilog configuration (minimum levels, sinks). |
 | `OTEL_EXPORTER_OTLP_ENDPOINT` | OTLP collector endpoint; when set, traces/metrics are exported. |
@@ -310,7 +310,7 @@ Interactive documentation (with Azure AD login) is available at `/swagger` in De
 ### Prerequisites
 
 - [.NET 10 SDK](https://dotnet.microsoft.com/download)
-- [PostgreSQL](https://www.postgresql.org/download/)
+- A SQL Server instance — [Azure SQL Database](https://azure.microsoft.com/products/azure-sql/database/), or a local engine ([SQL Server](https://www.microsoft.com/sql-server/sql-server-downloads) / the [mssql Docker image](https://hub.docker.com/_/microsoft-mssql-server) on macOS/Linux)
 - An [Azure AD App Registration](https://portal.azure.com/) (only needed when running with auth enabled):
   - Exposed API scope: `access_as_user`
   - SPA redirect URI for Swagger: `https://localhost:7170/swagger/oauth2-redirect.html`
@@ -319,12 +319,15 @@ Interactive documentation (with Azure AD login) is available at `/swagger` in De
 
 ```bash
 # 1. Create the local database
-psql -U postgres -c "CREATE DATABASE tyto_dev;"
+sqlcmd -S localhost -U sa -P "<sa-password>" -Q "CREATE DATABASE tyto_dev;"
 
 # 2. Configure secrets (from Tyto.Api/)
 cd Tyto.Api
 dotnet user-secrets init
-dotnet user-secrets set "ConnectionStrings:TytoDb" "Host=localhost;Port=5432;Database=tyto_dev;Username=<pg-user>"
+# SQL auth (local / SQL Server container):
+dotnet user-secrets set "ConnectionStrings:TytoDb" "Server=localhost,1433;Initial Catalog=tyto_dev;User ID=sa;Password=<sa-password>;Encrypt=True;TrustServerCertificate=True;"
+# Azure SQL with Entra / Managed Identity (passwordless) instead:
+# dotnet user-secrets set "ConnectionStrings:TytoDb" "Server=tcp:<server>.database.windows.net,1433;Initial Catalog=tyto;Encrypt=True;TrustServerCertificate=False;Authentication=Active Directory Default;"
 # Only if running with auth enabled:
 dotnet user-secrets set "AzureAd:TenantId" "<tenant-id>"
 dotnet user-secrets set "AzureAd:ClientId" "<client-id>"
@@ -357,7 +360,7 @@ The test suite has two tiers:
   swapped for InMemory), verifying the auth toggle (`200` vs `401`), rate limiting (`429` +
   `RATE_LIMIT_EXCEEDED`), the liveness probe, and the success/`ProblemDetails` response shapes.
 
-> A future tier of integration tests against a real PostgreSQL container (Testcontainers) requires a
+> A future tier of integration tests against a real SQL Server container (Testcontainers) requires a
 > running Docker daemon.
 
 ---

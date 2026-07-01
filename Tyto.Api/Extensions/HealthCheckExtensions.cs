@@ -7,14 +7,14 @@ public static class HealthCheckExtensions
     private const string ReadyTag = "ready";
 
     /// <summary>
-    /// Registers application health checks, including a PostgreSQL readiness probe.
+    /// Registers application health checks, including a SQL Server readiness probe.
     /// </summary>
     public static IServiceCollection AddHealthChecksConfig(this IServiceCollection services, IConfiguration configuration)
     {
         var connectionString = configuration.GetConnectionString("TytoDb") ?? string.Empty;
 
         services.AddHealthChecks()
-            .AddNpgSql(connectionString, name: "postgres", tags: [ReadyTag]);
+            .AddSqlServer(connectionString, name: "sqlserver", tags: [ReadyTag]);
 
         return services;
     }
