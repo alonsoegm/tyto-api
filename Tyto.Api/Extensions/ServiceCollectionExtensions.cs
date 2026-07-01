@@ -4,7 +4,9 @@ using Tyto.Api.Application.Interfaces;
 using Tyto.Api.Application.Services;
 using Tyto.Api.Application.Services.Extraction;
 using Tyto.Api.Application.Services.Extraction.Parsing;
+using Tyto.Api.Application.Services.Extraction.Sinks;
 using Tyto.Api.Application.Services.Metadata;
+using Tyto.Api.Domain.Enums;
 using Tyto.Api.Infrastructure.Data;
 using Tyto.Api.Infrastructure.Mapping;
 
@@ -32,6 +34,14 @@ public static class ServiceCollectionExtensions
         // Extraction pipeline (MVP: LLM-only path).
         services.AddScoped<IExtractionService, ExtractionService>();
         services.AddScoped<LlmExtractor>();
+
+        // Extraction sinks: resolved by connection type via keyed DI. The resolver centralizes
+        // selection so callers never resolve sinks from the service provider directly.
+        services.AddScoped<IExtractionSinkResolver, ExtractionSinkResolver>();
+        services.AddKeyedScoped<IExtractionSink, InternalSqlSink>(ConnectionType.InternalSql.ToString());
+        services.AddKeyedScoped<IExtractionSink, SalesforceSink>(ConnectionType.Salesforce.ToString());
+        services.AddKeyedScoped<IExtractionSink, DataverseSink>(ConnectionType.Dataverse.ToString());
+
         services.AddSingleton<DocumentTextExtractorFactory>();
         services.AddSingleton<IDocumentTextExtractor, PdfDocumentExtractor>();
         services.AddSingleton<IDocumentTextExtractor, DocxDocumentExtractor>();

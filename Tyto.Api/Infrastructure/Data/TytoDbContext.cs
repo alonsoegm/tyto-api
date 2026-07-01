@@ -13,6 +13,7 @@ public class TytoDbContext : DbContext
     public DbSet<Configuration> Configurations => Set<Configuration>();
     public DbSet<MappedField> MappedFields => Set<MappedField>();
     public DbSet<RunHistory> RunHistories => Set<RunHistory>();
+    public DbSet<ExtractionResult> ExtractionResults => Set<ExtractionResult>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
