@@ -44,7 +44,7 @@ public class DataverseMetadataProvider : IMetadataProvider
         _logger = logger;
     }
 
-    public ConnectionType SupportedType => ConnectionType.MsDataverse;
+    public ConnectionType SupportedType => ConnectionType.Dataverse;
 
     public async Task<Result<List<EntityDto>>> GetEntitiesAsync(DatabaseConnection connection, CancellationToken cancellationToken = default)
     {
@@ -100,29 +100,31 @@ public class DataverseMetadataProvider : IMetadataProvider
     /// </summary>
     protected virtual async Task<Result<string>> AcquireTokenAsync(DatabaseConnection connection, CancellationToken cancellationToken)
     {
-        if (connection.DV_AuthMethod != DataverseAuthMethod.ClientSecret)
-            return Result.Fail<string>(new ValidationError(
-                $"Dataverse metadata is only supported with ClientSecret authentication. '{connection.DV_AuthMethod}' is not yet implemented."));
+        var config = connection.GetDataverseConfig();
 
-        if (string.IsNullOrWhiteSpace(connection.DV_EnvironmentUrl)
-            || string.IsNullOrWhiteSpace(connection.DV_TenantId)
-            || string.IsNullOrWhiteSpace(connection.DV_ClientId))
+        if (config?.AuthMethod != DataverseAuthMethod.ClientSecret)
+            return Result.Fail<string>(new ValidationError(
+                $"Dataverse metadata is only supported with ClientSecret authentication. '{config?.AuthMethod}' is not yet implemented."));
+
+        if (string.IsNullOrWhiteSpace(config.EnvironmentUrl)
+            || string.IsNullOrWhiteSpace(config.TenantId)
+            || string.IsNullOrWhiteSpace(config.ClientId))
             return Result.Fail<string>(new ValidationError(
                 "The Dataverse connection is missing required fields (environment URL, tenant ID, or client ID)."));
 
-        var secret = TryDecrypt(connection.DV_ClientSecret);
+        var secret = TryDecrypt(config.ClientSecret);
         if (string.IsNullOrWhiteSpace(secret))
             return Result.Fail<string>(new InternalError("Unable to read the stored Dataverse client secret."));
 
         try
         {
             var app = ConfidentialClientApplicationBuilder
-                .Create(connection.DV_ClientId)
+                .Create(config.ClientId)
                 .WithClientSecret(secret)
-                .WithAuthority($"https://login.microsoftonline.com/{connection.DV_TenantId}")
+                .WithAuthority($"https://login.microsoftonline.com/{config.TenantId}")
                 .Build();
 
-            var scopes = new[] { $"{connection.DV_EnvironmentUrl}/.default" };
+            var scopes = new[] { $"{config.EnvironmentUrl}/.default" };
             var authResult = await app.AcquireTokenForClient(scopes).ExecuteAsync(cancellationToken);
 
             return Result.Ok(authResult.AccessToken);
@@ -145,7 +147,8 @@ public class DataverseMetadataProvider : IMetadataProvider
             var httpClient = _httpClientFactory.CreateClient(ExternalHttpClients.ConnectionTest);
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
-            var requestUrl = $"{connection.DV_EnvironmentUrl!.TrimEnd('/')}/{DataverseApiPath}/{relativeUrl}";
+            var environmentUrl = connection.GetDataverseConfig()?.EnvironmentUrl;
+            var requestUrl = $"{environmentUrl!.TrimEnd('/')}/{DataverseApiPath}/{relativeUrl}";
             var response = await httpClient.GetAsync(requestUrl, cancellationToken);
 
             if (!response.IsSuccessStatusCode)
