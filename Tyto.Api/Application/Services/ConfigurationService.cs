@@ -8,6 +8,7 @@ using Tyto.Api.Application.Common.Errors;
 using Tyto.Api.Application.Common.Validation;
 using Tyto.Api.Application.DTOs.Configuration;
 using Tyto.Api.Application.Interfaces;
+using Tyto.Api.Application.Services.Extraction.Sinks;
 using Tyto.Api.Domain.Entities;
 using Tyto.Api.Domain.Enums;
 using Tyto.Api.Infrastructure.Data;
@@ -108,8 +109,15 @@ public class ConfigurationService : IConfigurationService
             if (!await _db.LanguageModels.AnyAsync(x => x.Id == dto.LanguageModelId, cancellationToken))
                 return Result.Fail<ConfigurationResponseDto>(new NotFoundError(nameof(LanguageModel), dto.LanguageModelId));
 
-            if (!await _db.DatabaseConnections.AnyAsync(x => x.Id == dto.DatabaseConnectionId, cancellationToken))
+            var connection = await _db.DatabaseConnections
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == dto.DatabaseConnectionId, cancellationToken);
+            if (connection is null)
                 return Result.Fail<ConfigurationResponseDto>(new NotFoundError(nameof(DatabaseConnection), dto.DatabaseConnectionId));
+
+            var targetObject = ResolveTargetObject(connection, dto.TargetObject);
+            if (targetObject.IsFailed)
+                return Result.Fail<ConfigurationResponseDto>(targetObject.Errors);
 
             if (dto.DocumentModelId.HasValue && !await _db.DocumentModels.AnyAsync(x => x.Id == dto.DocumentModelId.Value, cancellationToken))
                 return Result.Fail<ConfigurationResponseDto>(new NotFoundError(nameof(DocumentModel), dto.DocumentModelId.Value));
@@ -117,6 +125,7 @@ public class ConfigurationService : IConfigurationService
             var entity = dto.Adapt<Configuration>();
             entity.CreatedBy = performedBy;
             entity.UpdatedBy = performedBy;
+            entity.TargetObject = targetObject.Value;
             entity.MaxUploadSizeMB = dto.MaxUploadSizeMB;
             entity.AcceptedFileTypes = JsonSerializer.Serialize(dto.AcceptedFileTypes);
 
@@ -152,10 +161,7 @@ public class ConfigurationService : IConfigurationService
                     .FirstOrDefaultAsync(cancellationToken)
                 : null;
 
-            var databaseConnectionName = await _db.DatabaseConnections
-                .Where(x => x.Id == dto.DatabaseConnectionId)
-                .Select(x => x.Name)
-                .FirstOrDefaultAsync(cancellationToken) ?? string.Empty;
+            var databaseConnectionName = connection.Name;
 
             _logger.LogInformation("Configuration '{Name}' created by {User} with {FieldCount} mapped fields", entity.Name, performedBy, entity.MappedFields.Count);
 
@@ -199,14 +205,22 @@ public class ConfigurationService : IConfigurationService
             if (!await _db.LanguageModels.AnyAsync(x => x.Id == dto.LanguageModelId, cancellationToken))
                 return Result.Fail<ConfigurationResponseDto>(new NotFoundError(nameof(LanguageModel), dto.LanguageModelId));
 
-            if (!await _db.DatabaseConnections.AnyAsync(x => x.Id == dto.DatabaseConnectionId, cancellationToken))
+            var connection = await _db.DatabaseConnections
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == dto.DatabaseConnectionId, cancellationToken);
+            if (connection is null)
                 return Result.Fail<ConfigurationResponseDto>(new NotFoundError(nameof(DatabaseConnection), dto.DatabaseConnectionId));
+
+            var targetObject = ResolveTargetObject(connection, dto.TargetObject);
+            if (targetObject.IsFailed)
+                return Result.Fail<ConfigurationResponseDto>(targetObject.Errors);
 
             if (dto.DocumentModelId.HasValue && !await _db.DocumentModels.AnyAsync(x => x.Id == dto.DocumentModelId.Value, cancellationToken))
                 return Result.Fail<ConfigurationResponseDto>(new NotFoundError(nameof(DocumentModel), dto.DocumentModelId.Value));
 
             dto.Adapt(entity);
             entity.UpdatedBy = performedBy;
+            entity.TargetObject = targetObject.Value;
 
             var auditResult = _auditLog.Log(AuditAction.Update, AuditEntityType.Configuration, entity.Id, entity.Name, null, performedBy);
             if (auditResult.IsFailed)
@@ -244,6 +258,22 @@ public class ConfigurationService : IConfigurationService
         {
             return Result.Fail(new InternalError($"Failed to delete configuration {id}.", ex));
         }
+    }
+
+    /// <summary>
+    /// Resolves the configuration's target object based on the connection type (never its name):
+    /// internal connections write to Tyto's fixed <see cref="InternalSqlSink.EntityName"/> and ignore
+    /// any client-supplied value; external connections must supply a non-empty target object.
+    /// </summary>
+    private static Result<string> ResolveTargetObject(DatabaseConnection connection, string? requested)
+    {
+        if (connection.IsInternal)
+            return Result.Ok(InternalSqlSink.EntityName);
+
+        if (string.IsNullOrWhiteSpace(requested))
+            return Result.Fail<string>(new ValidationError("Target object is required for external connections."));
+
+        return Result.Ok(requested.Trim());
     }
 
     private static ConfigurationResponseDto MapToResponseDto(Configuration x) =>

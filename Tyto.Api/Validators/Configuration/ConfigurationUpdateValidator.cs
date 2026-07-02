@@ -10,7 +10,9 @@ public class ConfigurationUpdateValidator : AbstractValidator<ConfigurationUpdat
     {
         RuleFor(x => x.Name).NotEmpty().MaximumLength(200);
         RuleFor(x => x.Description).MaximumLength(1000);
-        RuleFor(x => x.TargetObject).NotEmpty().MaximumLength(200);
+        // TargetObject is required only for external connections; internal is resolved server-side.
+        // The connection-type-dependent rule lives in ConfigurationService (see create validator).
+        RuleFor(x => x.TargetObject).MaximumLength(200);
         RuleFor(x => x.LanguageModelId).NotEmpty();
         RuleFor(x => x.DatabaseConnectionId).NotEmpty();
         RuleFor(x => x.SystemPrompt).MaximumLength(5000);

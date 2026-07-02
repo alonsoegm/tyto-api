@@ -10,7 +10,10 @@ public class ConfigurationCreateValidator : AbstractValidator<ConfigurationCreat
     {
         RuleFor(x => x.Name).NotEmpty().MaximumLength(200);
         RuleFor(x => x.Description).MaximumLength(1000);
-        RuleFor(x => x.TargetObject).NotEmpty().MaximumLength(200);
+        // TargetObject is required only for external connections; for internal (Internal SQL) it is
+        // resolved server-side. That connection-type-dependent rule lives in ConfigurationService,
+        // which has the DatabaseConnection loaded. Here we only bound the length.
+        RuleFor(x => x.TargetObject).MaximumLength(200);
         RuleFor(x => x.LanguageModelId).NotEmpty();
         RuleFor(x => x.DatabaseConnectionId).NotEmpty();
         RuleFor(x => x.SystemPrompt).MaximumLength(5000);
