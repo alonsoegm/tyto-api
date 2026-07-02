@@ -8,13 +8,16 @@ using Tyto.Api.Application.Interfaces;
 using Tyto.Api.Application.Services.Extraction.Parsing;
 using Tyto.Api.Domain.Entities;
 using Tyto.Api.Infrastructure.Data;
+using ExtractionResultData = Tyto.Api.Application.DTOs.Extraction.ExtractionResult;
+using ExtractionResultEntity = Tyto.Api.Domain.Entities.ExtractionResult;
 
 namespace Tyto.Api.Application.Services.Extraction;
 
 /// <summary>
 /// Orchestrates a single extraction run: load configuration → extract text → build schema
-/// and prompt → call the language model → persist run history → return the JSON. This MVP
-/// implements the LLM-only path (no Document Intelligence, no destination write).
+/// and prompt → call the language model → write the result to the configured destination via the
+/// resolved <see cref="IExtractionSink"/> → persist run history → return the JSON. This MVP implements
+/// the LLM-only path (no Document Intelligence).
 /// </summary>
 public class ExtractionService : IExtractionService
 {
@@ -23,17 +26,20 @@ public class ExtractionService : IExtractionService
     private readonly TytoDbContext _db;
     private readonly DocumentTextExtractorFactory _textExtractors;
     private readonly LlmExtractor _llmExtractor;
+    private readonly IExtractionSinkResolver _sinkResolver;
     private readonly ILogger<ExtractionService> _logger;
 
     public ExtractionService(
         TytoDbContext db,
         DocumentTextExtractorFactory textExtractors,
         LlmExtractor llmExtractor,
+        IExtractionSinkResolver sinkResolver,
         ILogger<ExtractionService> logger)
     {
         _db = db;
         _textExtractors = textExtractors;
         _llmExtractor = llmExtractor;
+        _sinkResolver = sinkResolver;
         _logger = logger;
     }
 
@@ -50,6 +56,7 @@ public class ExtractionService : IExtractionService
             .AsNoTrackingWithIdentityResolution()
             .Include(c => c.LanguageModel)
             .Include(c => c.DocumentModel)
+            .Include(c => c.DatabaseConnection)
             .Include(c => c.MappedFields)
             .FirstOrDefaultAsync(c => c.Id == configurationId, cancellationToken);
 
@@ -59,10 +66,20 @@ public class ExtractionService : IExtractionService
         if (configuration.LanguageModel is null)
             return Result.Fail(new ValidationError("The configuration has no language model assigned."));
 
+        if (configuration.DatabaseConnection is null)
+            return Result.Fail(new ValidationError("The configuration has no database connection assigned."));
+
         // [1] Validate the upload against the configuration.
         var validationError = ValidateFile(configuration, file);
         if (validationError is not null)
             return Result.Fail(validationError);
+
+        // Resolve the destination sink up front so unsupported types (e.g. Cosmos DB) fail fast,
+        // before any language-model work — and never after reporting success.
+        var sinkResult = _sinkResolver.Resolve(configuration.DatabaseConnection);
+        if (sinkResult.IsFailed)
+            return Result.Fail(sinkResult.Errors);
+        var sink = sinkResult.Value;
 
         var startedAt = DateTime.UtcNow;
         var stopwatch = Stopwatch.StartNew();
@@ -96,8 +113,20 @@ public class ExtractionService : IExtractionService
             var fields = JsonNode.Parse(rawJson) as JsonObject ?? new JsonObject();
             stopwatch.Stop();
 
-            // [9] Persist a successful run.
+            // [9] Write the structured result to the configured destination, then persist the run.
+            // The run is only recorded as successful once the write staged cleanly; unsupported
+            // destinations throw and are handled below as a failed run.
             var run = CreateRun(configuration.Id, startedAt, success: true, file, rawJson, triggeredBy, error: null);
+            var extraction = new ExtractionResultData(
+                ConfigurationId: configuration.Id,
+                RunHistoryId: run.Id,
+                Fields: fields,
+                LanguageModelName: configuration.LanguageModel.Name,
+                DocumentModelName: null,
+                DurationMs: stopwatch.ElapsedMilliseconds);
+            await sink.WriteAsync(extraction, cancellationToken);
+            run.RecordsCreated = 1;
+
             _db.RunHistories.Add(run);
             await _db.SaveChangesAsync(cancellationToken);
 
@@ -116,16 +145,41 @@ public class ExtractionService : IExtractionService
             stopwatch.Stop();
             _logger.LogError(ex, "Extraction failed for configuration {ConfigurationId}", configurationId);
 
+            // A failed write may have staged a (now-invalid) success run and/or result — drop them so
+            // only the failed run is persisted.
+            DiscardPendingRunAndResult();
+
             // [9] Persist a failed run so the attempt is auditable, then surface the error.
             var detail = Describe(ex);
             var run = CreateRun(configuration.Id, startedAt, success: false, file, rawOutput: null, triggeredBy, error: detail);
             _db.RunHistories.Add(run);
             await _db.SaveChangesAsync(cancellationToken);
 
+            // An unimplemented destination (external sinks in the MVP) is a controlled, expected
+            // condition — surface it as a validation error rather than a 500.
+            if (ex is NotSupportedException)
+                return Result.Fail(new ValidationError(
+                    $"The destination for this configuration is not available yet. {ex.Message}"));
+
             // NOTE: includes the exception detail in the response to speed up POC iteration.
             // Tighten this (generic message only) before any non-dev use.
             return Result.Fail(new InternalError($"Failed to run the extraction. {detail}", ex));
         }
+    }
+
+    /// <summary>
+    /// Detaches any run-history or extraction-result rows staged during a failed attempt so the
+    /// subsequent failed-run insert is the only change committed for this request.
+    /// </summary>
+    private void DiscardPendingRunAndResult()
+    {
+        var pending = _db.ChangeTracker.Entries()
+            .Where(e => e.State == EntityState.Added &&
+                        (e.Entity is RunHistory || e.Entity is ExtractionResultEntity))
+            .ToList();
+
+        foreach (var entry in pending)
+            entry.State = EntityState.Detached;
     }
 
     private ValidationError? ValidateFile(Configuration configuration, ExtractionFileInput file)

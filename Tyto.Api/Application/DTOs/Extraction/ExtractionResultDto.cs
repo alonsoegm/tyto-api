@@ -4,8 +4,8 @@ namespace Tyto.Api.Application.DTOs.Extraction;
 
 /// <summary>
 /// Result of running an extraction for a saved configuration against a single document.
-/// The MVP only returns the extracted JSON and run metadata — it does not write to the
-/// destination database.
+/// Returns the extracted JSON and run metadata; the structured result is also written to the
+/// configuration's destination via the resolved extraction sink (Internal SQL in the MVP).
 /// </summary>
 /// <param name="Fields">The structured data extracted from the document, shaped by the configuration's mapped fields.</param>
 /// <param name="DurationMs">Total processing time, in milliseconds.</param>
